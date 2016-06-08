@@ -1,4 +1,4 @@
-# imguial
+# ImGuiAl
 Some widgets for [imgui](https://github.com/ocornut/imgui).
 
 ## ImGuiAl::Log
