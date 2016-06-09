@@ -22,24 +22,46 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#include <imgui.h>
 #include <imguial_log.h>
+#include <stdlib.h>
 #include <stdio.h>
 
-ImGuiAl::Log::Log()
+// Must be at most 65535
+#define MAX_LINE_SIZE 1024
+
+ImGuiAl::Log::~Log()
 {
+  free( m_Buffer );
+}
+
+bool ImGuiAl::Log::Init( size_t buf_size )
+{
+  if ( buf_size < MAX_LINE_SIZE + 2 )
+  {
+    // buf_size must be enough to hold one line plus its length encoded in two bytes.
+    return false;
+  }
+  
+  m_Buffer = (char*)malloc( buf_size );
+  
+  if ( m_Buffer == NULL )
+  {
+    return false;
+  }
+  
+  m_Size = buf_size;
+  m_Avail = buf_size;
   m_Level = kDebug;
   m_Cumulative = true;
-  m_History = 256;
+  m_First = m_Last = 0;
   
   SetColor( kDebug, 0.0f, 0.6f, 1.0f );
   SetColor( kInfo,  0.0f, 1.0f, 0.4f );
   SetColor( kWarn,  0.8f, 0.8f, 0.0f );
   SetColor( kError, 1.0f, 0.3f, 0.3f );
-}
-
-ImGuiAl::Log::~Log()
-{
-  Clear();
+  
+  return true;
 }
 
 void ImGuiAl::Log::SetColor( Level level, float r, float g, float b )
@@ -57,29 +79,42 @@ void ImGuiAl::Log::SetColor( Level level, float r, float g, float b )
 
 void ImGuiAl::Log::VPrintf( Level level, const char* format, va_list args )
 {
-  if ( level >= 0 && level <= 3 )
+  level = (Level)( level & 3 );
+  
+  char line[ MAX_LINE_SIZE ];
+  size_t length = vsnprintf( line, sizeof( line ), format, args );
+  
+  if ( length > sizeof( line ) )
   {
-    char buffer[ 1024 ];
-    
-    buffer[ 0 ] = '0' + level;
-    
-    vsnprintf( buffer + 1, sizeof( buffer ) - 1, format, args );
-    buffer[ sizeof( buffer ) - 1 ] = 0;
-    
-    const char* line = strdup( buffer );
-    
-    if ( line )
-    {
-      m_Items.push_back( line );
-      m_ScrollToBottom = true;
-    }
-    
-    if ( m_Items.Size > m_History )
-    {
-      free( (void*)m_Items[ 0 ] );
-      m_Items.erase( m_Items.begin() );
-    }
+    // Line size too small, truncated. Consider increasing the array size.
+    length = sizeof( line );
   }
+  
+  length += 3; // Add one byte for the level and two bytes for the length.
+  
+  if ( length > m_Avail )
+  {
+    do
+    {
+      // Remove content until we have enough space.
+      unsigned char meta[ 3 ];
+      Read( meta, 3 );
+      Skip( meta[ 1 ] | meta[ 2 ] << 8 ); // Little endian.
+    }
+    while ( length > m_Avail );
+  }
+  
+  unsigned char meta[ 3 ];
+  length -= 3;
+  
+  meta[ 0 ] = level;
+  meta[ 1 ] = length & 0xff;
+  meta[ 2 ] = length >> 8;
+  
+  Write( meta, 3 );
+  Write( line, length );
+  
+  m_ScrollToBottom = true;
 }
 
 void ImGuiAl::Log::Debug( const char* format, ... )
@@ -112,17 +147,6 @@ void ImGuiAl::Log::Error( const char* format, ... )
   va_start( args, format );
   VPrintf( kError, format, args );
   va_end( args );
-}
-
-void ImGuiAl::Log::Clear()
-{
-  for ( int i = 0; i < m_Items.Size; i++ )
-  {
-    free( (void*)m_Items[ i ] );
-  }
-  
-  m_Items.clear();
-  m_ScrollToBottom = true;
 }
 
 void ImGuiAl::Log::Draw()
@@ -203,20 +227,27 @@ void ImGuiAl::Log::Draw()
   id[ sizeof( id ) - 1 ] = 0;
   
   ImGui::BeginChild( id, ImVec2( 0, -ImGui::GetItemsLineHeightWithSpacing() ), false, ImGuiWindowFlags_HorizontalScrollbar );
-  
   ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( 4, 1 ) );
   
-  for ( int i = 0; i < m_Items.Size; i++ )
+  size_t pos = m_First;
+  
+  while ( pos != m_Last )
   {
-    const char* item = m_Items[ i ];
-    int level = *item++ - '0';
+    char line[ MAX_LINE_SIZE + 1 ];
+    unsigned char meta[ 3 ];
+    pos = Peek( pos, meta, 3 );
+    
+    Level level = (Level)meta[ 0 ];
+    size_t length = meta[ 1 ] | meta[ 2 ] << 8;
+    pos = Peek( pos, line, length );
+    line[ length ] = 0;
     
     bool show = ( m_Cumulative && level >= m_Level ) || level == m_Level;
     
-    if ( show && m_Filter.PassFilter( item ) )
+    if ( show && m_Filter.PassFilter( line ) )
     {
       ImGui::PushStyleColor( ImGuiCol_Text, m_Colors[ level ][ 0 ].Value );
-      ImGui::TextUnformatted( item );
+      ImGui::TextUnformatted( line );
       ImGui::PopStyleColor();
     }
   }
@@ -229,4 +260,60 @@ void ImGuiAl::Log::Draw()
   
   ImGui::PopStyleVar();
   ImGui::EndChild();
+}
+
+void ImGuiAl::Log::Write( const void* data, size_t size )
+{
+  size_t first = size;
+  size_t second = 0;
+  
+  if ( first > m_Size - m_Last )
+  {
+    first = m_Size - m_Last;
+    second = size - first;
+  }
+  
+  char* dest = m_Buffer + m_Last;
+  memcpy( dest, data, first );
+  memcpy( m_Buffer, (char*)data + first, second );
+  
+  m_Last = ( m_Last + size ) % m_Size;
+  m_Avail -= size;
+}
+
+void ImGuiAl::Log::Read( void* data, size_t size )
+{
+  size_t first = size;
+  size_t second = 0;
+  
+  if ( first > m_Size - m_First )
+  {
+    first = m_Size - m_First;
+    second = size - first;
+  }
+  
+  char* src = m_Buffer + m_First;
+  memcpy( data, src, first );
+  memcpy( (char*)data + first, m_Buffer, second );
+  
+  m_First = ( m_First + size ) % m_Size;
+  m_Avail += size;
+}
+
+size_t ImGuiAl::Log::Peek( size_t pos, void* data, size_t size )
+{
+  size_t first = size;
+  size_t second = 0;
+  
+  if ( first > m_Size - pos )
+  {
+    first = m_Size - pos;
+    second = size - first;
+  }
+  
+  char* src = m_Buffer + pos;
+  memcpy( data, src, first );
+  memcpy( (char*)data + first, m_Buffer, second );
+  
+  return ( pos + size ) % m_Size;
 }

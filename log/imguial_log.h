@@ -24,7 +24,7 @@ SOFTWARE.
 
 #pragma once
 
-#include <imgui.h>
+#include <stddef.h>
 #include <stdarg.h>
 
 namespace ImGuiAl
@@ -40,14 +40,14 @@ namespace ImGuiAl
       kError = 3
     };
     
-    Log();
-    virtual ~Log();
-    
-    inline void SetHistory( int lines )
+    inline Log()
     {
-      m_History = lines > 0 ? lines : 1;
+      m_Buffer = NULL;
     }
     
+    virtual ~Log();
+    
+    bool Init( size_t buf_size );
     void SetColor( Level level, float r, float g, float b );
     
     void VPrintf( Level level, const char* format, va_list args );
@@ -57,13 +57,31 @@ namespace ImGuiAl
     void Warn( const char* format, ... );
     void Error( const char* format, ... );
     
-    void Clear();
+    inline void Clear()
+    {
+      m_First = m_Last = 0;
+      m_Avail = m_Size;
+      m_ScrollToBottom = true;
+    }
     
     void Draw();
     
   protected:
-    ImVector< const char* > m_Items;
-    int             m_History;
+    void   Write( const void* data, size_t size );
+    void   Read( void* data, size_t size );
+    size_t Peek( size_t pos, void* data, size_t size );
+    
+    inline void Skip( size_t size )
+    {
+      m_First = ( m_First + size ) % m_Size;
+      m_Avail += size;
+    }
+    
+    char*           m_Buffer;
+    size_t          m_Size;
+    size_t          m_Avail;
+    size_t          m_First;
+    size_t          m_Last;
     Level           m_Level;
     bool            m_Cumulative;
     ImGuiTextFilter m_Filter;
