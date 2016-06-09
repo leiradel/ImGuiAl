@@ -937,8 +937,3 @@
 #define ICON_MD_ZOOM_IN "\xEE\xA3\xBF"
 #define ICON_MD_ZOOM_OUT "\xEE\xA4\x80"
 #define ICON_MD_ZOOM_OUT_MAP "\xEE\x95\xAB"
-
-namespace ImGuiAl
-{
-  const void* GetMDICompressedData( int* size );
-}
