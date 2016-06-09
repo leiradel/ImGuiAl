@@ -22,7 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <imgui.h>
 #include <imguial_log.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -149,9 +148,9 @@ void ImGuiAl::Log::Error( const char* format, ... )
   va_end( args );
 }
 
-void ImGuiAl::Log::Draw()
+void ImGuiAl::Log::Draw( bool filters )
 {
-  if ( ImGui::CollapsingHeader( "Filters" ) )
+  if ( filters && ImGui::CollapsingHeader( "Filters" ) )
   {
     ImGui::PushStyleColor( ImGuiCol_Button, m_Colors[ kDebug ][ 1 ] );
     ImGui::PushStyleColor( ImGuiCol_ButtonHovered, m_Colors[ kDebug ][ 2 ] );

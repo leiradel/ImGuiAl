@@ -24,6 +24,7 @@ SOFTWARE.
 
 #pragma once
 
+#include <imgui.h>
 #include <stddef.h>
 #include <stdarg.h>
 
@@ -64,7 +65,7 @@ namespace ImGuiAl
       m_ScrollToBottom = true;
     }
     
-    void Draw();
+    void Draw( bool filters = true );
     
   protected:
     void   Write( const void* data, size_t size );
