@@ -54,19 +54,19 @@ int ImGuiAl::MsgBox::Draw()
     {
       if ( m_Icon != NULL )
       {
-        ImGui::Columns( 2, NULL, false );
-        
         ImVec2 size = ImGui::CalcTextSize( m_Icon );
         ImVec2 pos = ImGui::GetCursorPos();
+        float save_y = pos.y;
         pos.y += size.y * 2;
+        
         ImGui::SetCursorPos( pos );
         ImGui::Text( "%s", m_Icon );
         
-        ImGui::NextColumn();
-        ImGui::SetColumnOffset( -1, pos.x + size.x );
+        pos.x += size.x;
+        pos.y = save_y;
         
+        ImGui::SetCursorPos( pos );
         ImGui::TextWrapped( "%s", m_Text );
-        ImGui::Columns( 1 );
       }
       else
       {
