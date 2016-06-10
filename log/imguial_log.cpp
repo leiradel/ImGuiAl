@@ -34,11 +34,11 @@ ImGuiAl::Log::~Log()
   free( m_Buffer );
 }
 
-bool ImGuiAl::Log::Init( size_t buf_size )
+bool ImGuiAl::Log::Init( size_t buf_size, bool show_filters )
 {
-  if ( buf_size < MAX_LINE_SIZE + 2 )
+  if ( buf_size < MAX_LINE_SIZE + 3 )
   {
-    // buf_size must be enough to hold one line plus its length encoded in two bytes.
+    // buf_size must be enough to hold one line plus its level and length encoded in three bytes.
     return false;
   }
   
@@ -51,9 +51,11 @@ bool ImGuiAl::Log::Init( size_t buf_size )
   
   m_Size = buf_size;
   m_Avail = buf_size;
+  m_First = m_Last = 0;
+  
+  m_ShowFilters = show_filters;
   m_Level = kDebug;
   m_Cumulative = true;
-  m_First = m_Last = 0;
   
   SetColor( kDebug, 0.0f, 0.6f, 1.0f );
   SetColor( kInfo,  0.0f, 1.0f, 0.4f );
@@ -148,9 +150,9 @@ void ImGuiAl::Log::Error( const char* format, ... )
   va_end( args );
 }
 
-void ImGuiAl::Log::Draw( bool filters )
+void ImGuiAl::Log::Draw()
 {
-  if ( filters && ImGui::CollapsingHeader( "Filters" ) )
+  if ( m_ShowFilters && ImGui::CollapsingHeader( "Filters" ) )
   {
     ImGui::PushStyleColor( ImGuiCol_Button, m_Colors[ kDebug ][ 1 ] );
     ImGui::PushStyleColor( ImGuiCol_ButtonHovered, m_Colors[ kDebug ][ 2 ] );

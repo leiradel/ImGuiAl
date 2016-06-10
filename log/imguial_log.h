@@ -48,7 +48,7 @@ namespace ImGuiAl
     
     virtual ~Log();
     
-    bool Init( size_t buf_size );
+    bool Init( size_t buf_size, bool show_filters = false );
     void SetColor( Level level, float r, float g, float b );
     
     void VPrintf( Level level, const char* format, va_list args );
@@ -65,7 +65,7 @@ namespace ImGuiAl
       m_ScrollToBottom = true;
     }
     
-    void Draw( bool filters = true );
+    void Draw();
     
   protected:
     void   Write( const void* data, size_t size );
@@ -83,6 +83,7 @@ namespace ImGuiAl
     size_t          m_Avail;
     size_t          m_First;
     size_t          m_Last;
+    bool            m_ShowFilters;
     Level           m_Level;
     bool            m_Cumulative;
     ImGuiTextFilter m_Filter;
