@@ -30,16 +30,19 @@ ImGuiAl::Log::~Log()
 {
 }
 
-bool ImGuiAl::Log::Init( bool show_filters, const char** more_actions )
+bool ImGuiAl::Log::Init( unsigned flags, const char** more_actions )
 {
   // Do compile-time checks for the line and buffer sizes.
   char check_line_size[ IMGUIAL_LOG_MAX_LINE_SIZE <= 65535 ? 1 : -1 ];
   char check_buffer_size[ IMGUIAL_LOG_MAX_BUFFER_SIZE >= IMGUIAL_LOG_MAX_LINE_SIZE + 3 ? 1 : -1 ];
+  
+  (void)check_line_size;
+  (void)check_buffer_size;
 
   m_Avail = IMGUIAL_LOG_MAX_BUFFER_SIZE;
   m_First = m_Last = 0;
   
-  m_ShowFilters = show_filters;
+  m_Flags = flags;
   m_MoreActions = more_actions;
   m_Level = kDebug;
   m_Cumulative = true;
@@ -49,13 +52,13 @@ bool ImGuiAl::Log::Init( bool show_filters, const char** more_actions )
   SetColor( kWarn,  0.8f, 0.8f, 0.0f );
   SetColor( kError, 1.0f, 0.3f, 0.3f );
   
-  SetLabel( kDebug, "Debug" );
-  SetLabel( kInfo, "Info" );
-  SetLabel( kWarn, "Warn" );
-  SetLabel( kError, "Error" );
-  SetCumulativeLabel( "Cumulative" );
-  SetFilterHeaderLabel( "Filters" );
-  SetFilterLabel( "Filter (inc,-exc)" );
+  m_Labels[ kDebug ]  = "Debug";
+  m_Labels[ kInfo ]   = "Info";
+  m_Labels[ kWarn ]   = "Warn";
+  m_Labels[ kError ]  = "Error";
+  m_CumulativeLabel   = "Cumulative";
+  m_FilterHeaderLabel = NULL;
+  m_FilterLabel       = "Filter (inc,-exc)";
   
   return true;
 }
@@ -200,7 +203,6 @@ void ImGuiAl::Log::Iterate( IterateFunc iterator, bool apply_filters, void* ud )
   }
 }
 
-
 int ImGuiAl::Log::Draw()
 {
   int action = 0;
@@ -218,7 +220,7 @@ int ImGuiAl::Log::Draw()
     }
   }
   
-  if ( m_ShowFilters && ImGui::CollapsingHeader( m_FilterHeaderLabel ) )
+  if ( ( m_FilterHeaderLabel && ImGui::CollapsingHeader( m_FilterHeaderLabel ) ) || ( m_Flags & kShowFilters ) != 0 )
   {
     ImGui::PushStyleColor( ImGuiCol_Button, m_Colors[ kDebug ][ 1 ] );
     ImGui::PushStyleColor( ImGuiCol_ButtonHovered, m_Colors[ kDebug ][ 2 ] );

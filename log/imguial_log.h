@@ -51,6 +51,11 @@ namespace ImGuiAl
       kError = 3
     };
     
+    enum Flags
+    {
+      kShowFilters = 1 << 0
+    };
+    
     typedef bool ( *IterateFunc )( Level level, const char* line, void *ud );
     
     inline Log()
@@ -60,7 +65,7 @@ namespace ImGuiAl
     
     virtual ~Log();
     
-    bool Init( bool show_filters = false, const char** more_actions = NULL );
+    bool Init( unsigned flags = 0, const char** more_actions = NULL );
     
     void SetColor( Level level, float r, float g, float b );
     void SetLabel( Level level, const char* label );
@@ -101,7 +106,7 @@ namespace ImGuiAl
     size_t          m_Avail;
     size_t          m_First;
     size_t          m_Last;
-    bool            m_ShowFilters;
+    unsigned        m_Flags;
     const char**    m_MoreActions;
     Level           m_Level;
     bool            m_Cumulative;
