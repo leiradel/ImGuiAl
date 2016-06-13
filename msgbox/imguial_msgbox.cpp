@@ -57,12 +57,12 @@ int ImGuiAl::MsgBox::Draw()
         ImVec2 size = ImGui::CalcTextSize( m_Icon );
         ImVec2 pos = ImGui::GetCursorPos();
         float save_y = pos.y;
-        pos.y += size.y * 2;
+        pos.y += size.y;
         
         ImGui::SetCursorPos( pos );
         ImGui::Text( "%s", m_Icon );
         
-        pos.x += size.x;
+        pos.x += size.x + pos.x;
         pos.y = save_y;
         
         ImGui::SetCursorPos( pos );
@@ -108,4 +108,9 @@ int ImGuiAl::MsgBox::Draw()
   }
   
   return index;
+}
+
+void ImGuiAl::MsgBox::Open()
+{
+  ImGui::OpenPopup( m_Title );
 }

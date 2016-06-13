@@ -26,34 +26,21 @@ SOFTWARE.
 #include <stdlib.h>
 #include <stdio.h>
 
-// Must be at most 65535
-#define MAX_LINE_SIZE 1024
-
 ImGuiAl::Log::~Log()
 {
-  free( m_Buffer );
 }
 
-bool ImGuiAl::Log::Init( size_t buf_size, bool show_filters )
+bool ImGuiAl::Log::Init( bool show_filters, const char** more_actions )
 {
-  if ( buf_size < MAX_LINE_SIZE + 3 )
-  {
-    // buf_size must be enough to hold one line plus its level and length encoded in three bytes.
-    return false;
-  }
-  
-  m_Buffer = (char*)malloc( buf_size );
-  
-  if ( m_Buffer == NULL )
-  {
-    return false;
-  }
-  
-  m_Size = buf_size;
-  m_Avail = buf_size;
+  // Do compile-time checks for the line and buffer sizes.
+  char check_line_size[ IMGUIAL_LOG_MAX_LINE_SIZE <= 65535 ? 1 : -1 ];
+  char check_buffer_size[ IMGUIAL_LOG_MAX_BUFFER_SIZE >= IMGUIAL_LOG_MAX_LINE_SIZE + 3 ? 1 : -1 ];
+
+  m_Avail = IMGUIAL_LOG_MAX_BUFFER_SIZE;
   m_First = m_Last = 0;
   
   m_ShowFilters = show_filters;
+  m_MoreActions = more_actions;
   m_Level = kDebug;
   m_Cumulative = true;
   
@@ -61,6 +48,14 @@ bool ImGuiAl::Log::Init( size_t buf_size, bool show_filters )
   SetColor( kInfo,  0.0f, 1.0f, 0.4f );
   SetColor( kWarn,  0.8f, 0.8f, 0.0f );
   SetColor( kError, 1.0f, 0.3f, 0.3f );
+  
+  SetLabel( kDebug, "Debug" );
+  SetLabel( kInfo, "Info" );
+  SetLabel( kWarn, "Warn" );
+  SetLabel( kError, "Error" );
+  SetCumulativeLabel( "Cumulative" );
+  SetFilterHeaderLabel( "Filters" );
+  SetFilterLabel( "Filter (inc,-exc)" );
   
   return true;
 }
@@ -78,11 +73,29 @@ void ImGuiAl::Log::SetColor( Level level, float r, float g, float b )
   m_Colors[ level ][ 3 ] = ImColor::HSV( h, s, v + 0.2f );
 }
 
+void ImGuiAl::Log::SetLabel( Level level, const char* label )
+{
+  m_Labels[ level ] = label;
+}
+
+void ImGuiAl::Log::SetCumulativeLabel( const char* label )
+{
+  m_CumulativeLabel = label;
+}
+
+void ImGuiAl::Log::SetFilterHeaderLabel( const char* label )
+{
+  m_FilterHeaderLabel = label;
+}
+
+void ImGuiAl::Log::SetFilterLabel( const char* label )
+{
+  m_FilterLabel = label;
+}
+
 void ImGuiAl::Log::VPrintf( Level level, const char* format, va_list args )
 {
-  level = (Level)( level & 3 );
-  
-  char line[ MAX_LINE_SIZE ];
+  char line[ IMGUIAL_LOG_MAX_LINE_SIZE ];
   size_t length = vsnprintf( line, sizeof( line ), format, args );
   
   if ( length > sizeof( line ) )
@@ -150,14 +163,67 @@ void ImGuiAl::Log::Error( const char* format, ... )
   va_end( args );
 }
 
-void ImGuiAl::Log::Draw()
+void ImGuiAl::Log::Iterate( IterateFunc iterator, bool apply_filters, void* ud )
 {
-  if ( m_ShowFilters && ImGui::CollapsingHeader( "Filters" ) )
+  size_t pos = m_First;
+  
+  while ( pos != m_Last )
+  {
+    char line[ IMGUIAL_LOG_MAX_LINE_SIZE + 1 ];
+    unsigned char meta[ 3 ];
+    pos = Peek( pos, meta, 3 );
+    
+    Level level = (Level)meta[ 0 ];
+    size_t length = meta[ 1 ] | meta[ 2 ] << 8;
+    pos = Peek( pos, line, length );
+    line[ length ] = 0;
+    
+    bool show;
+    
+    if ( apply_filters )
+    {
+      show = ( m_Cumulative && level >= m_Level ) || level == m_Level;
+      show = show && m_Filter.PassFilter( line );
+    }
+    else
+    {
+      show = true;
+    }
+    
+    if ( show )
+    {
+      if ( !iterator( level, line, ud ) )
+      {
+        return;
+      }
+    }
+  }
+}
+
+
+int ImGuiAl::Log::Draw()
+{
+  int action = 0;
+  
+  for ( int i = 0; m_MoreActions[ i ] != NULL; i++ )
+  {
+    if ( i != 0 )
+    {
+      ImGui::SameLine();
+    }
+    
+    if ( ImGui::Button( m_MoreActions[ i ] ) )
+    {
+      action = i + 1;
+    }
+  }
+  
+  if ( m_ShowFilters && ImGui::CollapsingHeader( m_FilterHeaderLabel ) )
   {
     ImGui::PushStyleColor( ImGuiCol_Button, m_Colors[ kDebug ][ 1 ] );
     ImGui::PushStyleColor( ImGuiCol_ButtonHovered, m_Colors[ kDebug ][ 2 ] );
     ImGui::PushStyleColor( ImGuiCol_ButtonActive, m_Colors[ kDebug ][ 3 ] );
-    bool ok = ImGui::Button( "Debug" );
+    bool ok = ImGui::Button( m_Labels[ kDebug ] );
     ImGui::PopStyleColor( 3 );
 
     if ( ok )
@@ -171,7 +237,7 @@ void ImGuiAl::Log::Draw()
     ImGui::PushStyleColor( ImGuiCol_Button, m_Colors[ kInfo ][ 1 ] );
     ImGui::PushStyleColor( ImGuiCol_ButtonHovered, m_Colors[ kInfo ][ 2 ] );
     ImGui::PushStyleColor( ImGuiCol_ButtonActive, m_Colors[ kInfo ][ 3 ] );
-    ok = ImGui::Button( "Info" );
+    ok = ImGui::Button( m_Labels[ kInfo ] );
     ImGui::PopStyleColor( 3 );
 
     if ( ok )
@@ -185,7 +251,7 @@ void ImGuiAl::Log::Draw()
     ImGui::PushStyleColor( ImGuiCol_Button, m_Colors[ kWarn ][ 1 ] );
     ImGui::PushStyleColor( ImGuiCol_ButtonHovered, m_Colors[ kWarn ][ 2 ] );
     ImGui::PushStyleColor( ImGuiCol_ButtonActive, m_Colors[ kWarn ][ 3 ] );
-    ok = ImGui::Button( "Warn" );
+    ok = ImGui::Button( m_Labels[ kWarn ] );
     ImGui::PopStyleColor( 3 );
 
     if ( ok )
@@ -199,7 +265,7 @@ void ImGuiAl::Log::Draw()
     ImGui::PushStyleColor( ImGuiCol_Button, m_Colors[ kError ][ 1 ] );
     ImGui::PushStyleColor( ImGuiCol_ButtonHovered, m_Colors[ kError ][ 2 ] );
     ImGui::PushStyleColor( ImGuiCol_ButtonActive, m_Colors[ kError ][ 3 ] );
-    ok = ImGui::Button( "Error" );
+    ok = ImGui::Button( m_Labels[ kError ] );
     ImGui::PopStyleColor( 3 );
 
     if ( ok )
@@ -209,17 +275,8 @@ void ImGuiAl::Log::Draw()
     }
     
     ImGui::SameLine();
-    
-    ImGui::Checkbox( "Cumulative", &m_Cumulative );
-    
-    ImGui::SameLine();
-    
-    if ( ImGui::Button( "Clear" ) )
-    {
-      Clear();
-    }
-    
-    m_Filter.Draw();
+    ImGui::Checkbox( m_CumulativeLabel, &m_Cumulative );
+    m_Filter.Draw( m_FilterLabel );
   }
   
   // Do I need an unique id in BeginChild?
@@ -230,28 +287,21 @@ void ImGuiAl::Log::Draw()
   ImGui::BeginChild( id, ImVec2( 0, -ImGui::GetItemsLineHeightWithSpacing() ), false, ImGuiWindowFlags_HorizontalScrollbar );
   ImGui::PushStyleVar( ImGuiStyleVar_ItemSpacing, ImVec2( 4, 1 ) );
   
-  size_t pos = m_First;
-  
-  while ( pos != m_Last )
+  struct Iterator
   {
-    char line[ MAX_LINE_SIZE + 1 ];
-    unsigned char meta[ 3 ];
-    pos = Peek( pos, meta, 3 );
-    
-    Level level = (Level)meta[ 0 ];
-    size_t length = meta[ 1 ] | meta[ 2 ] << 8;
-    pos = Peek( pos, line, length );
-    line[ length ] = 0;
-    
-    bool show = ( m_Cumulative && level >= m_Level ) || level == m_Level;
-    
-    if ( show && m_Filter.PassFilter( line ) )
+    static bool Func( Level level, const char* line, void *ud )
     {
-      ImGui::PushStyleColor( ImGuiCol_Text, m_Colors[ level ][ 0 ].Value );
+      Log* self = (Log*)ud;
+      
+      ImGui::PushStyleColor( ImGuiCol_Text, self->m_Colors[ level ][ 0 ].Value );
       ImGui::TextUnformatted( line );
       ImGui::PopStyleColor();
+      
+      return true;
     }
-  }
+  };
+  
+  Iterate( Iterator::Func, true, this );
   
   if ( m_ScrollToBottom )
   {
@@ -261,6 +311,8 @@ void ImGuiAl::Log::Draw()
   
   ImGui::PopStyleVar();
   ImGui::EndChild();
+  
+  return action;
 }
 
 void ImGuiAl::Log::Write( const void* data, size_t size )
@@ -268,9 +320,9 @@ void ImGuiAl::Log::Write( const void* data, size_t size )
   size_t first = size;
   size_t second = 0;
   
-  if ( first > m_Size - m_Last )
+  if ( first > IMGUIAL_LOG_MAX_BUFFER_SIZE - m_Last )
   {
-    first = m_Size - m_Last;
+    first = IMGUIAL_LOG_MAX_BUFFER_SIZE - m_Last;
     second = size - first;
   }
   
@@ -278,7 +330,7 @@ void ImGuiAl::Log::Write( const void* data, size_t size )
   memcpy( dest, data, first );
   memcpy( m_Buffer, (char*)data + first, second );
   
-  m_Last = ( m_Last + size ) % m_Size;
+  m_Last = ( m_Last + size ) % IMGUIAL_LOG_MAX_BUFFER_SIZE;
   m_Avail -= size;
 }
 
@@ -287,9 +339,9 @@ void ImGuiAl::Log::Read( void* data, size_t size )
   size_t first = size;
   size_t second = 0;
   
-  if ( first > m_Size - m_First )
+  if ( first > IMGUIAL_LOG_MAX_BUFFER_SIZE - m_First )
   {
-    first = m_Size - m_First;
+    first = IMGUIAL_LOG_MAX_BUFFER_SIZE - m_First;
     second = size - first;
   }
   
@@ -297,7 +349,7 @@ void ImGuiAl::Log::Read( void* data, size_t size )
   memcpy( data, src, first );
   memcpy( (char*)data + first, m_Buffer, second );
   
-  m_First = ( m_First + size ) % m_Size;
+  m_First = ( m_First + size ) % IMGUIAL_LOG_MAX_BUFFER_SIZE;
   m_Avail += size;
 }
 
@@ -306,9 +358,9 @@ size_t ImGuiAl::Log::Peek( size_t pos, void* data, size_t size )
   size_t first = size;
   size_t second = 0;
   
-  if ( first > m_Size - pos )
+  if ( first > IMGUIAL_LOG_MAX_BUFFER_SIZE - pos )
   {
-    first = m_Size - pos;
+    first = IMGUIAL_LOG_MAX_BUFFER_SIZE - pos;
     second = size - first;
   }
   
@@ -316,5 +368,5 @@ size_t ImGuiAl::Log::Peek( size_t pos, void* data, size_t size )
   memcpy( data, src, first );
   memcpy( (char*)data + first, m_Buffer, second );
   
-  return ( pos + size ) % m_Size;
+  return ( pos + size ) % IMGUIAL_LOG_MAX_BUFFER_SIZE;
 }

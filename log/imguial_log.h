@@ -28,6 +28,16 @@ SOFTWARE.
 #include <stddef.h>
 #include <stdarg.h>
 
+// Must be at most 65535
+#ifndef IMGUIAL_LOG_MAX_LINE_SIZE
+#define IMGUIAL_LOG_MAX_LINE_SIZE 1024
+#endif
+
+// Must be at least MAX_LINE_SIZE + 3
+#ifndef IMGUIAL_LOG_MAX_BUFFER_SIZE
+#define IMGUIAL_LOG_MAX_BUFFER_SIZE 65536
+#endif
+
 namespace ImGuiAl
 {
   class Log
@@ -41,15 +51,22 @@ namespace ImGuiAl
       kError = 3
     };
     
+    typedef bool ( *IterateFunc )( Level level, const char* line, void *ud );
+    
     inline Log()
     {
-      m_Buffer = NULL;
+      Init();
     }
     
     virtual ~Log();
     
-    bool Init( size_t buf_size, bool show_filters = false );
+    bool Init( bool show_filters = false, const char** more_actions = NULL );
+    
     void SetColor( Level level, float r, float g, float b );
+    void SetLabel( Level level, const char* label );
+    void SetCumulativeLabel( const char* label );
+    void SetFilterHeaderLabel( const char* label );
+    void SetFilterLabel( const char* label );
     
     void VPrintf( Level level, const char* format, va_list args );
     
@@ -61,11 +78,13 @@ namespace ImGuiAl
     inline void Clear()
     {
       m_First = m_Last = 0;
-      m_Avail = m_Size;
+      m_Avail = IMGUIAL_LOG_MAX_BUFFER_SIZE;
       m_ScrollToBottom = true;
     }
     
-    void Draw();
+    void Iterate( IterateFunc iterator, bool apply_filters, void* ud );
+    
+    int Draw();
     
   protected:
     void   Write( const void* data, size_t size );
@@ -74,20 +93,24 @@ namespace ImGuiAl
     
     inline void Skip( size_t size )
     {
-      m_First = ( m_First + size ) % m_Size;
+      m_First = ( m_First + size ) % IMGUIAL_LOG_MAX_BUFFER_SIZE;
       m_Avail += size;
     }
     
-    char*           m_Buffer;
-    size_t          m_Size;
+    char            m_Buffer[ IMGUIAL_LOG_MAX_BUFFER_SIZE ];
     size_t          m_Avail;
     size_t          m_First;
     size_t          m_Last;
     bool            m_ShowFilters;
+    const char**    m_MoreActions;
     Level           m_Level;
     bool            m_Cumulative;
     ImGuiTextFilter m_Filter;
     bool            m_ScrollToBottom;
     ImColor         m_Colors[ 4 ][ 4 ];
+    const char*     m_Labels[ 4 ];
+    const char*     m_CumulativeLabel;
+    const char*     m_FilterHeaderLabel;
+    const char*     m_FilterLabel;
   };
 }

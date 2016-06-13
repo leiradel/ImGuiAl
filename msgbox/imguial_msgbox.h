@@ -34,6 +34,7 @@ namespace ImGuiAl
     
     bool Init( const char* title, const char* icon, const char* text, const char** captions, bool show_checkbox = false );
     int  Draw();
+    void Open();
     
     inline void AskAgain()
     {
