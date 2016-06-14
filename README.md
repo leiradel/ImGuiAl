@@ -6,6 +6,7 @@ Some widgets for [imgui](https://github.com/ocornut/imgui).
 * **Log**: A complete logger, with different colors for different message priorities and filters.
 * **Fonts**: Extra fonts conveniently packed for use with imgui.
 * **MsgBox**: A modal, configurable message box dialog.
+* **Button**: A button that can be disabled.
 
 ## Documentation
 
