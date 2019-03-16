@@ -7,6 +7,7 @@ Some widgets for [imgui](https://github.com/ocornut/imgui).
 * **Fonts**: Extra fonts conveniently packed for use with imgui.
 * **MsgBox**: A modal, configurable message box dialog.
 * **Button**: A button that can be disabled.
+* **Sparkline**: A wrapper around `ImGui::PlotLines` that maintains the history of values.
 
 ## Documentation
 
