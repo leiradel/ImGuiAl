@@ -24,6 +24,8 @@ SOFTWARE.
 
 #pragma once
 
+#include <imgui.h>
+
 namespace ImGuiAl
 {
   inline bool Button( const char* label, bool enabled = true, const ImVec2& size = ImVec2( 0, 0 ) )
