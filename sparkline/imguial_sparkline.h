@@ -29,57 +29,52 @@ SOFTWARE.
 #include <stdio.h>
 
 namespace ImGuiAl {
-  template<typename T, size_t L>
-  class Sparkline {
-    public:
-      Sparkline() {
-        setLimits(0, 1);
-        clear();
-      }
+    template<typename T, size_t L>
+    class Sparkline {
+        public:
+            Sparkline() {
+                setLimits(0, 1);
+                clear();
+            }
 
-      void setLimits(T min, T max) {
-        _min = static_cast<float>(min);
-        _max = static_cast<float>(max);
-      }
+            void setLimits(T const min, T const max) {
+                _min = static_cast<float>(min);
+                _max = static_cast<float>(max);
+            }
 
-      void addValue(T value) {
-        memmove((void*)_values, (void*)(_values + 1), (L - 1) * sizeof(T));
-        _values[L - 1] = value;
-      }
+            void add(T const value) {
+                _offset = (_offset + 1) % L;
+                _values[_offset] = value;
+            }
 
-      void clear() {
-        memset((void*)_values, 0, L * sizeof(T));
-      }
+            void clear() {
+                memset(_values, 0, L * sizeof(T));
+                _offset = L - 1;
+            }
 
-      void draw() {
-        ImVec2 max = ImGui::GetContentRegionAvail();
-        draw(max);
-      }
+            void draw(char const* const label = "", ImVec2 const size = ImVec2()) const {
+                char overlay[32];
+                print(overlay, sizeof(overlay), _values[_offset]);
+                ImGui::PlotLines(label, getValue, const_cast<Sparkline*>(this), L, 0, overlay, _min, _max, size);
+            }
 
-      void draw(const ImVec2& size) {
-        char overlay[32];
-        format(overlay, sizeof(overlay), _values[L - 1]);
+        protected:
+            float _min, _max;
+            T _values[L];
+            size_t _offset;
 
-        ImGui::PushID(static_cast<void*>(this));
-        ImGui::PlotLines("##plot", getValue, static_cast<void*>(this), L, 0, overlay, _min, _max, size);
-        ImGui::PopID();
-      }
-      
-    protected:
-      float _min, _max;
-      T _values[L];
+            static float getValue(void* const data, int const idx) {
+                Sparkline const* const self = static_cast<Sparkline*>(data);
+                size_t const index = (idx + self->_offset + 1) % L;
+                return static_cast<float>(self->_values[index]);
+            }
 
-      static float getValue(void* data, int idx) {
-        Sparkline* self = static_cast<Sparkline*>(data);
-        return static_cast<float>(self->_values[idx]);
-      }
+            static void print(char* const buffer, size_t const bufferLen, int const value) {
+                snprintf(buffer, bufferLen, "%d", value);
+            }
 
-      static void format(char* buffer, size_t bufferLen, int value) {
-        snprintf(buffer, bufferLen, "%d", value);
-      }
-
-      static void format(char* buffer, size_t bufferLen, double value) {
-        snprintf(buffer, bufferLen, "%f", value);
-      }
-  };
+            static void print(char* const buffer, size_t const bufferLen, double const value) {
+                snprintf(buffer, bufferLen, "%f", value);
+            }
+    };
 }
