@@ -30,3 +30,7 @@
 
 # Debug files
 *.dSYM/
+
+# Custom
+.vscode
+fonts/ttf/*.ttf
