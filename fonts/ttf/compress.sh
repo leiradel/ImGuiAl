@@ -1,3 +1,7 @@
+#!/bin/sh
+
+# Needs https://github.com/ocornut/imgui/blob/master/misc/fonts/binary_to_compressed_c.cpp
+
 binary_to_compressed_c cft.ttf CodingFontTobi > ../CodingFontTobi.inl
 binary_to_compressed_c Cousine-BoldItalic.ttf CousineBoldItalic > ../CousineBoldItalic.inl
 binary_to_compressed_c Cousine-Bold.ttf CousineBold > ../CousineBold.inl
