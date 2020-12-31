@@ -189,7 +189,7 @@ void ImGuiAl::Crt::draw(ImVec2 const& size) {
 
 void ImGuiAl::Crt::draw(ImVec2 const& size, const std::function<bool(Info const& header, char const* const line)>& filter) {
     char id[64];
-    snprintf(id, sizeof(id), "ImGuiAl::Crt@%p", this);
+    snprintf(id, sizeof(id), "ImGuiAl::Crt@%p", static_cast<void*>(this));
     
     ImGui::BeginChild(id, size, false, ImGuiWindowFlags_HorizontalScrollbar);
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4.0f, 1.0f));
