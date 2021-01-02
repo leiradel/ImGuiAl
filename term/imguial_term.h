@@ -131,6 +131,8 @@ namespace ImGuiAl {
         void clear() { Crt::clear(); }
         void iterate(const std::function<bool(Info const& header, char const* const line)>& iterator) const { Crt::iterate(iterator); }
         void scrollToBottom() { Crt::scrollToBottom(); }
+        void setLevel(Level const level) { _level = level; }
+        void setCumulative(bool const cumulative) { _cumulative = cumulative; }
 
         int draw(ImVec2 const& size = ImVec2(0.0f, 0.0f));
 
