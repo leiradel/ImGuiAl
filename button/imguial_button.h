@@ -26,27 +26,23 @@ SOFTWARE.
 
 #include <imgui.h>
 
-namespace ImGuiAl
-{
-  inline bool Button( const char* label, bool enabled = true, const ImVec2& size = ImVec2( 0, 0 ) )
-  {
-    if ( enabled )
-    {
-      return ImGui::Button( label, size );
+namespace ImGuiAl {
+    inline bool Button(const char* label, bool enabled = true, const ImVec2& size = ImVec2(0, 0)) {
+        if (enabled) {
+            return ImGui::Button(label, size);
+        }
+        else {
+            ImColor disabled_fg = ImColor(IM_COL32_BLACK);
+            ImColor disabled_bg = ImColor(IM_COL32(64, 64, 64, 255));
+
+            ImGui::PushStyleColor(ImGuiCol_Text, disabled_fg.Value);
+            ImGui::PushStyleColor(ImGuiCol_Button, disabled_bg.Value);
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, disabled_bg.Value);
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, disabled_bg.Value);
+            ImGui::Button(label, size);
+            ImGui::PopStyleColor(4);
+
+            return false;
+        }
     }
-    else
-    {
-      ImColor disabled_fg = ImColor( IM_COL32_BLACK );
-      ImColor disabled_bg = ImColor( IM_COL32( 64, 64, 64, 255 ) );
-      
-      ImGui::PushStyleColor( ImGuiCol_Text, disabled_fg );
-      ImGui::PushStyleColor( ImGuiCol_Button, disabled_bg );
-      ImGui::PushStyleColor( ImGuiCol_ButtonHovered, disabled_bg );
-      ImGui::PushStyleColor( ImGuiCol_ButtonActive, disabled_bg );
-      ImGui::Button( label, size );
-      ImGui::PopStyleColor( 4 );
-      
-      return false;
-    }
-  }
 }
