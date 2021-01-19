@@ -240,7 +240,6 @@ ImGuiAl::Log::Log(void* const buffer, size_t const buffer_size)
     , _cumulativeLabel("Cumulative")
     , _filterLabel("Filter (inc,-exc)")
     , _filterHeaderLabel(nullptr)
-    , _showFilters(true)
     , _actions(nullptr)
     , _level(Level::Debug)
     , _cumulative(true) {
@@ -316,7 +315,7 @@ int ImGuiAl::Log::draw(ImVec2 const& size) {
         }
     }
 
-    if ((_filterHeaderLabel != nullptr && ImGui::CollapsingHeader(_filterHeaderLabel)) || _showFilters) {
+    if ((_filterHeaderLabel != nullptr && ImGui::CollapsingHeader(_filterHeaderLabel))) {
         ImGui::PushStyleColor(ImGuiCol_Button, _debugButtonColor);
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, _debugButtonHoveredColor);
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, _debugTextColor);

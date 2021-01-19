@@ -169,7 +169,6 @@ namespace ImGuiAl {
         char const* _filterLabel;
         char const* _filterHeaderLabel;
 
-        bool _showFilters;
         char const* const* _actions;
 
         Level _level;
