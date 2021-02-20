@@ -47,27 +47,31 @@ namespace ImGuiAl {
         void add(float const value) {
             _offset = (_offset + 1) % _count;
             _values[_offset] = value;
-
-            if (_auto) {
-                _min = std::min(_min, value);
-                _max = std::max(_max, value);
-            }
         }
 
         void clear() {
             memset(_values, 0, _count * sizeof(float));
             _offset = _count - 1;
-
-            if (_auto) {
-                _min = FLT_MAX;
-                _max = -FLT_MAX;
-            }
         }
 
         void draw(char const* const label = "", ImVec2 const size = ImVec2()) const {
             char overlay[32];
             snprintf(overlay, sizeof(overlay), "%f", _values[_offset]);
-            ImGui::PlotLines(label, getValue, const_cast<Sparkline*>(this), _count, 0, overlay, _min, _max, size);
+
+            float min = _min, max = _max;
+
+            if (_auto) {
+                min = FLT_MAX;
+                max = -FLT_MAX;
+
+                for (size_t i = 0; i < _count; i++) {
+                    float const value = _values[i];
+                    min = std::min(min, value);
+                    max = std::max(max, value);
+                }
+            }
+
+            ImGui::PlotLines(label, getValue, const_cast<Sparkline*>(this), _count, 0, overlay, min, max, size);
         }
 
     protected:
