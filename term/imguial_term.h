@@ -184,7 +184,8 @@ namespace ImGuiAl {
                      size_t const buffer_size,
                      void* const cmd_buf,
                      size_t const cmd_size,
-                     std::function<void(Terminal& self, char* const command)>&& execute);
+                     std::function<void(Terminal& self, char* const command)>&& execute,
+                     std::function<void(Terminal& self, ImGuiInputTextCallbackData* data)>&& callback);
 
             void setForegroundColor(ImU32 const color) { Crt::setForegroundColor(color); }
 
@@ -201,6 +202,7 @@ namespace ImGuiAl {
             char* _commandBuffer;
             size_t _cmdBufferSize;
             std::function<void(Terminal& self, char* const command)> _execute;
+            std::function<void(Terminal& self, ImGuiInputTextCallbackData* data)> _callback;
     };
 
     template<size_t S>
@@ -224,8 +226,9 @@ namespace ImGuiAl {
     template<size_t S, size_t R>
     class BufferedTerminal : public Terminal {
     public:
-        BufferedTerminal(std::function<void(Terminal& self, char* const command)>&& execute)
-            : Terminal(_buffer, S, _commandBuffer, R, std::move(execute)) {}
+        BufferedTerminal(std::function<void(Terminal& self, char* const command)>&& execute,
+                         std::function<void(Terminal& self, ImGuiInputTextCallbackData* data)>&& callback)
+            : Terminal(_buffer, S, _commandBuffer, R, std::move(execute), std::move(callback)) {}
     
     protected:
         uint8_t _buffer[S];

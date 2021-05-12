@@ -454,11 +454,16 @@ ImGuiAl::Terminal::Terminal(void* const buffer,
                             size_t const buffer_size,
                             void* const cmd_buf,
                             size_t const cmd_size,
-                            std::function<void(Terminal& self, char* const command)>&& execute)
+                            std::function<void(Terminal& self, char* const command)>&& execute,
+                            std::function<void(Terminal& self, ImGuiInputTextCallbackData* data)>&& callback)
     : Crt(buffer, buffer_size)
     , _commandBuffer(static_cast<char*>(cmd_buf))
     , _cmdBufferSize(cmd_size)
-    , _execute(std::move(execute)) {}
+    , _execute(std::move(execute))
+    , _callback(std::move(callback)) {
+
+    *_commandBuffer = 0;
+}
 
 void ImGuiAl::Terminal::printf(char const* const format, ...) {
     va_list args;
@@ -472,11 +477,17 @@ void ImGuiAl::Terminal::draw(ImVec2 const& size) {
     Crt::draw(new_size);
     ImGui::Separator();
 
-    ImGuiInputTextFlags const flags = ImGuiInputTextFlags_EnterReturnsTrue;
+    ImGuiInputTextFlags const flags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackHistory;
+
+    static auto const callback = [](ImGuiInputTextCallbackData* data) -> int {
+        auto const self = static_cast<Terminal*>(data->UserData);
+        self->_callback(*self, data);
+        return 0;
+    };
 
     bool reclaim_focus = false;
 
-    if (ImGui::InputText("Command", _commandBuffer, _cmdBufferSize, flags, nullptr, nullptr)) {
+    if (ImGui::InputText("Command", _commandBuffer, _cmdBufferSize, flags, callback, this)) {
         char* begin = _commandBuffer;
 
         while (*begin != 0 && isspace(*begin)) {

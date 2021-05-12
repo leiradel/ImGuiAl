@@ -106,6 +106,6 @@ void setActions(char const* actions[]);
 
 # ImGuiAl::Terminal
 
-A `ImGuiAl::Crt` with an embedded command input box. It is identical to its parent class, with the exception of the `execute` function passed to the constructor which will be called when the command input box has some content in it and Enter is pressed.
+A `ImGuiAl::Crt` with an embedded command input box. It is identical to its parent class, with the exception of the `execute` and `callback` functions passed to the constructor which will be called when the command input box has some content in it and Enter is pressed, and when the Up or Down arrows are pressed, respectively.
 
 As the other two classes above, it also has a template that takes a buffer size and allocates the buffer, `ImGuiAl::BufferedTerminal`.
