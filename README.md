@@ -13,7 +13,7 @@ Most widgets can be seen in this [Hackable Console](https://github.com/leiradel/
 
 ![Hackable Console screenshot](https://raw.githubusercontent.com/leiradel/hackable-console/master/hc.png)
 
-* **Log**: Up left corner in the Log, showing the filter buttons and filter input box.
+* **Log**: Up left corner in the Log window, showing the filter buttons and filter input box.
 * **Fonts**: Hackable Console uses Proggy Tiny for text, and Font Awesome 4 for the icons.
 * **MsgBox**: Not present in the screenshot, it's likely outdated and won't build anymore.
 * **Button**: Bottom left corner in the Control window, with both enabled and disabled buttons.
