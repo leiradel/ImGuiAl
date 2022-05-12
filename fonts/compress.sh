@@ -6,6 +6,7 @@
 # g++ -O3 imgui/misc/fonts/$COMPRESS.cpp -o $COMPRESS
 COMPRESS="`pwd`/binary_to_compressed_c"
 
+rm *.inl
 mkdir -p temp && cd temp
 
 # Random fonts
