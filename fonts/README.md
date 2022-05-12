@@ -2,15 +2,33 @@
 
 This is not really a widget, but some fonts conveniently packed for use with [imgui](https://github.com/ocornut/imgui):
 
-* [Cousine Regular](https://www.google.com/fonts/specimen/Cousine) and [Droid Sans](https://www.fontsquirrel.com/fonts/droid-sans) (Google has removed Droid Sans from their website it seems)
-* [Karla Regular](https://www.google.com/fonts/specimen/Karla)
-* Many Tristan Grimmer [programming fonts](http://upperbounds.net/)
-* [Font Awesome](http://fontawesome.io/) versions 4 and 5 (does *not* include the pro fonts)
+* Codeface
+    * [Coding Font Tobi](https://github.com/chrissimpkins/codeface/tree/master/fonts/coding-font-tobi)
+    * [Crisp](https://github.com/chrissimpkins/codeface/tree/master/fonts/crisp)
+* [Fontaudio](https://github.com/fefanto/fontaudio)
+* Font Awesome
+    * [Font Awesome 4](https://github.com/FortAwesome/Font-Awesome/tree/4.x/fonts)
+    * [Font Awesome 5](https://fontawesome.com/v5/download)
+    * [Font Awesome 6](https://fontawesome.com/download)
 * [Fork Awesome](https://forkaweso.me/Fork-Awesome/)
-* [Material Design Icons](https://materialdesignicons.com/)
-* Google's [Material Design Icons](https://design.google.com/icons/)
-* [Kenney Icon Font](https://github.com/SamBrishes/kenney-icon-font)
-* [Ionicons](https://ionicons.com/)
+* Google
+    * [Cousine](https://fonts.google.com/specimen/Cousine)
+    * [Karla](https://fonts.google.com/specimen/Karla)
+    * [Material Icons / Material Symbols](https://github.com/google/material-design-icons)
+    * [Roboto](https://fonts.google.com/specimen/Roboto)
+* Kenney
+    * [Kenney Game Icons](https://www.kenney.nl/assets/game-icons)
+    * [Kenney Game Icons Expansion](https://www.kenney.nl/assets/game-icons-expansion)
+* [proggy_fonts](http://www.proggyfonts.net/)
+    * Pixel Carnage
+    * Proggy Clean
+    * Proggy Clean (Centered Ponctuation)
+    * Proggy Clean (Slashed Zero)
+    * Proggy Small
+    * Proggy Square
+    * Proggy Square (Slashed Zero)
+    * Proggy Tiny
+    * Proggy Tiny (Slashed Zero)
 
 The fonts are presented compressed and as C arrays, ready to be embedded:
 
