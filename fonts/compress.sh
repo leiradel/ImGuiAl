@@ -57,7 +57,8 @@ $COMPRESS Karla-ExtraBoldItalic.ttf KarlaExtraBoldItalic > ../KarlaExtraBoldItal
 $COMPRESS Karla-VariableFont_wght.ttf KarlaVariableFont > ../KarlaVariableFont.inl
 $COMPRESS Karla-Italic-VariableFont_wght.ttf KarlaItalicVariableFont > ../KarlaItalicVariableFont.inl
 
-curl -o PixelCarnageMono.ttf "https://raw.githubusercontent.com/npisanti/grimorio/master/fonts/repo/PixelCarnageMono.ttf"
+curl -o PixelCarnageMono.ttf.zip "http://www.proggyfonts.net/download/PixelCarnageMono.ttf.zip"
+unzip -oj PixelCarnageMono.ttf.zip
 $COMPRESS PixelCarnageMono.ttf PixelCarnageMono > ../PixelCarnageMono.inl
 
 curl -o ProggyClean.ttf.zip "http://www.proggyfonts.net/download/ProggyClean.ttf.zip"
@@ -92,36 +93,31 @@ $COMPRESS ProggyTinySZ.ttf ProggyTinySZ > ../ProggyTinySZ.inl
 # Fonts supported by https://github.com/juliettef/IconFontCppHeaders
 
 # Font Awesome 4
-curl -o fontawesome-webfont.ttf "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/4.x/fonts/fontawesome-webfont.ttf"
-$COMPRESS fontawesome-webfont.ttf FontAwesome4 > ../FontAwesome4.inl
+curl -o FontAwesome.otf "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/4.x/fonts/FontAwesome.otf"
+$COMPRESS FontAwesome.otf FontAwesome4 > ../FontAwesome4.inl
 
 # Font Awesome 5 free
-curl -o fa-5-brands-400.ttf "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/5.x/webfonts/fa-brands-400.ttf"
-$COMPRESS fa-5-brands-400.ttf FontAwesome5Brands400 > ../FontAwesome5Brands400.inl
-
-curl -o fa-5-regular-400.ttf "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/5.x/webfonts/fa-regular-400.ttf"
-$COMPRESS fa-5-regular-400.ttf FontAwesome5Regular400 > ../FontAwesome5Regular400.inl
-
-curl -o fa-5-solid-900.ttf "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/5.x/webfonts/fa-solid-900.ttf"
-$COMPRESS fa-5-solid-900.ttf FontAwesome5Solid900 > ../FontAwesome5Solid900.inl
+curl -o fontawesome-free-5.15.4-desktop.zip "https://use.fontawesome.com/releases/v5.15.4/fontawesome-free-5.15.4-desktop.zip"
+unzip -oj fontawesome-free-5.15.4-desktop.zip
+$COMPRESS "Font Awesome 5 Brands-Regular-400.otf" FontAwesome5Brands400 > ../FontAwesome5Brands400.inl
+$COMPRESS "Font Awesome 5 Free-Regular-400.otf" FontAwesome5Regular400 > ../FontAwesome5Regular400.inl
+$COMPRESS "Font Awesome 5 Free-Solid-900.otf" FontAwesome5Solid900 > ../FontAwesome5Solid900.inl
 
 # Font Awesome 6 free
-curl -o fa-6-brands-400.ttf "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/webfonts/fa-brands-400.ttf"
-$COMPRESS fa-6-brands-400.ttf FontAwesome6Brands400 > ../FontAwesome6Brands400.inl
-
-curl -o fa-6-regular-400.ttf "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/webfonts/fa-regular-400.ttf"
-$COMPRESS fa-6-regular-400.ttf FontAwesome6Regular400 > ../FontAwesome6Regular400.inl
-
-curl -o fa-6-solid-900.ttf "https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/webfonts/fa-solid-900.ttf"
-$COMPRESS fa-6-solid-900.ttf FontAwesome6Solid900 > ../FontAwesome6Solid900.inl
+curl -o fontawesome-free-6.1.1-desktop.zip "https://use.fontawesome.com/releases/v6.1.1/fontawesome-free-6.1.1-desktop.zip"
+unzip -oj fontawesome-free-6.1.1-desktop.zip
+$COMPRESS "Font Awesome 6 Brands-Regular-400.otf" FontAwesome6Brands400 > ../FontAwesome6Brands400.inl
+$COMPRESS "Font Awesome 6 Free-Regular-400.otf" FontAwesome6Regular400 > ../FontAwesome6Regular400.inl
+$COMPRESS "Font Awesome 6 Free-Solid-900.otf" FontAwesome6Solid900 > ../FontAwesome6Solid900.inl
 
 # Fork Awesome
-curl -o forkawesome-webfont.ttf "https://raw.githubusercontent.com/ForkAwesome/Fork-Awesome/master/fonts/forkawesome-webfont.ttf"
+curl -o Fork-Awesome-1.2.0.zip "https://codeload.github.com/ForkAwesome/Fork-Awesome/zip/refs/tags/1.2.0"
+unzip -oj Fork-Awesome-1.2.0.zip
 $COMPRESS forkawesome-webfont.ttf ForkAwesome > ../ForkAwesome.inl
 
 # Google Material Design icons
 curl -o MaterialIcons-Regular.ttf "https://raw.githubusercontent.com/google/material-design-icons/master/font/MaterialIcons-Regular.ttf"
-$COMPRESS MaterialIcons-Regular.ttf GoogleMaterialDesign > ../GoogleMaterialDesign.inl
+$COMPRESS MaterialIcons-Regular.ttf MaterialDesign > ../MaterialDesign.inl
 
 # Kenney Game icons and Game icons expansion
 curl -o kenney-icon-font.ttf "https://raw.githubusercontent.com/nicodinh/kenney-icon-font/master/fonts/kenney-icon-font.ttf"

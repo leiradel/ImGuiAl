@@ -1,7 +1,7 @@
 // File: 'MaterialIcons-Regular.ttf' (353892 bytes)
 // Exported using binary_to_compressed_c.cpp
-static const unsigned int GoogleMaterialDesign_compressed_size = 244178;
-static const unsigned int GoogleMaterialDesign_compressed_data[244180/4] =
+static const unsigned int MaterialDesign_compressed_size = 244178;
+static const unsigned int MaterialDesign_compressed_data[244180/4] =
 {
     0x0000bc57, 0x00000000, 0x64660500, 0x00000400, 0x00010037, 0x000f0000, 0x00030080, 0x45444770, 0x00090546, 0x01000053, 0x28158214, 0x4f50471c, 
     0x00150053, 0x200f820a, 0x380f8208, 0x5553470c, 0x3cd50142, 0x6c000003, 0xed000038, 0x2f534ff4, 0x22730a32, 0x201f8263, 0x381f82cc, 0x616d6360, 
