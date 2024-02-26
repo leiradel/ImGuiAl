@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <algorithm>
 
 ImGuiAl::Fifo::Fifo(void* const buffer, size_t const size)
     : _buffer(buffer)
