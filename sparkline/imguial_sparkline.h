@@ -26,7 +26,9 @@ SOFTWARE.
 
 #include <imgui.h>
 #include <stddef.h>
+#include <stdio.h>
 #include <float.h>
+#include <algorithm>
 
 namespace ImGuiAl {
     class Sparkline {
