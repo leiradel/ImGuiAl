@@ -73,7 +73,7 @@ namespace ImGuiAl {
                 }
             }
 
-            ImGui::PlotLines(label, getValue, const_cast<Sparkline*>(this), _count, 0, overlay, min, max, size);
+            ImGui::PlotLines(label, getValue, const_cast<Sparkline*>(this), (int)_count, 0, overlay, min, max, size);
         }
 
     protected:
