@@ -33,10 +33,19 @@ SOFTWARE.
 namespace ImGuiAl {
     class Sparkline {
     public:
+        enum class Mode {
+            kFixedLimits,
+            kAutoLimits,
+            kAutoKeepRange
+        };
+
         Sparkline(void* const buffer, size_t const size) {
             _values = static_cast<float*>(buffer);
             _count = size / sizeof(float);
+            _mode = Mode::kAutoLimits;
             _auto = true;
+            _min = FLT_MAX;
+            _max = -FLT_MAX;
             clear();
         }
 
@@ -44,11 +53,21 @@ namespace ImGuiAl {
             _min = min;
             _max = max;
             _auto = false;
+            _mode = Mode::kFixedLimits;
+        }
+
+        void keepRange() {
+            _mode = Mode::kAutoKeepRange;
         }
 
         void add(float const value) {
             _offset = (_offset + 1) % _count;
             _values[_offset] = value;
+
+            if (_mode == Mode::kAutoKeepRange) {
+                _min = std::min(_min, value);
+                _max = std::max(_max, value);
+            }
         }
 
         void clear() {
@@ -56,13 +75,13 @@ namespace ImGuiAl {
             _offset = _count - 1;
         }
 
-        void draw(char const* const label = "", ImVec2 const size = ImVec2()) const {
+        void draw(char const* const label = "", ImVec2 const size = ImVec2()) {
             char overlay[32];
             snprintf(overlay, sizeof(overlay), "%f", _values[_offset]);
 
             float min = _min, max = _max;
 
-            if (_auto) {
+            if (_mode == Mode::kAutoLimits) {
                 min = FLT_MAX;
                 max = -FLT_MAX;
 
@@ -79,6 +98,7 @@ namespace ImGuiAl {
     protected:
         float* _values;
         size_t _count;
+        Mode _mode;
         bool _auto;
         float _min, _max;
         size_t _offset;
