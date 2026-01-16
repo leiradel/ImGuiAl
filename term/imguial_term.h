@@ -134,6 +134,7 @@ namespace ImGuiAl {
         void setLevel(Level const level) { _level = level; }
         Level getLevel() const { return _level; }
         void setCumulative(bool const cumulative) { _cumulative = cumulative; }
+        bool getCumulative() const { return _cumulative; }
 
         int draw(ImVec2 const& size = ImVec2(0.0f, 0.0f));
 
